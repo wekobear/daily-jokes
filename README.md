@@ -4,7 +4,7 @@
 
 ## 使用
 
-最新首次配置、原生表单优先、热梗与独立漫画支持在 `main` 分支。下载 [main 源码包](https://github.com/WekoBear/daily-jokes/archive/refs/heads/main.zip)，解压后将包含 `SKILL.md` 的目录命名为 `jokes`，交给支持 Agent Skills 的宿主安装。保留相对目录，不要只复制入口文件。已有 v1.0.0 发行包仍是旧版，不能用它获取这些更新。
+下载 [v1.1.0 安装包 jokes.zip](https://github.com/WekoBear/daily-jokes/releases/download/v1.1.0/jokes.zip)，解压得到 `jokes/`，交给支持 Agent Skills 的宿主安装。此版本包含首次配置修复、原生表单优先、近期热梗及每则独立漫画。保留相对目录，不要只复制入口文件。后续发行版可从 [最新发行版](https://github.com/WekoBear/daily-jokes/releases/latest) 获取；开发中的代码见 [main 分支](https://github.com/WekoBear/daily-jokes/tree/main)。
 
 将 `jokes/` 放入安装宿主支持的 Skill 目录并确认已发现；仓库根目录本身就是 Skill，从源码归档安装时将技能目录名改为 `jokes`，保持三份 references 一同安装。
 
