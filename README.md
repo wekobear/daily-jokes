@@ -2,15 +2,66 @@
 
 一个可分享的 Agent Skill，包含两条制作路线：日常生成五个不同结构的文字笑话／独立漫画，以及将一则笑话制作成分镜和 AI 短视频。仓库名为 `daily-jokes`，技能短标识为 `jokes`。
 
-视频路线由 Codex 联网收集文案、生成并查看 GPT 图片，再由本地脚本调用 MiniMax 视频 API、下载镜头、组合成片和整理上传包。默认一则笑话、三个独立 9:16 镜头；它不会为满足旧文字模式而先生成五则或制作漫画拼格。
+视频路线由 Codex 联网收集文案、生成并查看 GPT 图片，再选择本地 FFmpeg 图文视频或 MiniMax API 动态视频。默认一则笑话、三个独立 9:16 镜头；它不会为满足旧文字模式而先生成五则或制作漫画拼格。
 
 **当前版本没有视频号上传器，不能声称已端到端跑通自动上传。** 2026-09-12 的接入尝试被宿主工具的站点安全策略拒绝，当前最后一步交付上传包，状态为待交接。后续只有在宿主可用且政策允许时才能通过官方支持渠道继续接入，并核验真实后台结果。见 [视频流程与完成边界](references/video-workflow.md)。
 
 ## 使用
 
+- [本地视频：无需视频 API](#本地视频无需视频-api)
+- [MiniMax 视频流程](#视频流程)
+- [文字与漫画](#文字与漫画)
+- [开源依赖与致谢](#开源依赖与致谢)
+
 视频流程请使用 [main 分支源码](https://github.com/WekoBear/daily-jokes/tree/main)。[v1.1.0 安装包 jokes.zip](https://github.com/WekoBear/daily-jokes/releases/download/v1.1.0/jokes.zip)仍是旧文字／漫画版本，包含首次配置、原生表单优先、近期热梗及每则独立漫画，**不包含本文的视频流程**。本次不创建新 release。
 
 仓库根目录本身就是 Skill。从源码安装时，将完整仓库内容放入宿主支持的 `jokes/` 技能目录，保留 `references/`、`scripts/`、`examples/` 和依赖文件，再确认宿主已发现它；不要只复制入口文件。运行区、私有环境文件和登录态不属于可分享的 Skill 包。
+
+## 本地视频：无需视频 API
+
+已经实跑的流程是：**笑话文案 → GPT 独立分镜 → macOS 中文配音 → FFmpeg 镜头推进与逐句字幕 → MP4、SRT、封面**。这是配音图文视频，镜头会轻微推进，但不是模型生成的人物动作动画。渲染本身不调用 MiniMax、不读取视频 API 密钥、不上传或发布。
+
+在 Codex 中可以直接说：
+
+```text
+$jokes 把这则笑话做成本地视频：用 GPT 生成独立分镜，
+使用中文角色配音和 FFmpeg 合成，不调用付费视频 API。
+```
+
+本地合成需要 macOS、Python 3.11+、Pillow、FFmpeg/ffprobe、中文字体与系统中文音色。先在系统安装 FFmpeg，再从仓库根目录运行下面的完整样例；已经附带三张 GPT 分镜，不必重新生图：
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+source .venv/bin/activate
+python3 scripts/pipeline.py doctor
+
+python3 scripts/pipeline.py init --story examples/afanti/story.json --run runs/afanti-local
+python3 scripts/pipeline.py image --run runs/afanti-local --shot s1 --file examples/afanti/images/s1.png
+python3 scripts/pipeline.py image --run runs/afanti-local --shot s2 --file examples/afanti/images/s2.png
+python3 scripts/pipeline.py image --run runs/afanti-local --shot s3 --file examples/afanti/images/s3.png
+python3 scripts/local_video.py --run runs/afanti-local
+```
+
+成片在 `runs/afanti-local/local-video/local_video.mp4`，同目录包含 SRT 字幕、`cover.jpg` 与验证记录。相同输入再次执行会复用已经核验的成片；不同故事另建运行目录，不覆盖旧版本。
+
+每镜的 `speech` 写完整台词；可选 `local_voices` 为 `narrator`／`woman`／`man` 指定本机 `say -v '?'` 列出的音色，`speaker_labels` 决定字幕中的角色名称，不会被念出。示例使用 Tingting 旁白、Grandpa 阿凡提、Reed 路人；若系统缺少这些音色，先在 macOS 安装，或在初始化前替换成可用中文音色。配音超长会报错，不截掉句尾。换字体可设置 `DAILY_JOKES_FONT`，字体文件不随仓库分发。
+
+已验收样例：[《因为这儿亮》15 秒视频](examples/afanti/demo.mp4) · [分镜、台词和提示词](examples/afanti/story.json)。故事依据为 [DLTK 的 The Lamp and the Key 整理页](https://www.dltk-kids.com/ya/nasruddin/lamp-key/story.htm)，本项目进行了简短中文改编，插图由 GPT 生成。
+
+[![《因为这儿亮》封面](examples/afanti/cover.jpg)](examples/afanti/demo.mp4)
+
+### 开源依赖与致谢
+
+感谢以下开源项目与维护者，让本地视频制作得以实现：
+
+| 项目 | 本项目中的用途 |
+| --- | --- |
+| [FFmpeg](https://ffmpeg.org/) · [源码仓库](https://github.com/FFmpeg/FFmpeg) | 视频镜头推进、音频混合、编码、片段拼接，以及使用 ffprobe 检查媒体；感谢社区提供成熟的音视频工具链。H.264 编码使用 FFmpeg 的 [x264](https://www.videolan.org/developers/x264.html) 支持。 |
+| [Pillow](https://python-pillow.org/) · [源码仓库](https://github.com/python-pillow/Pillow) | 中文字幕排版、透明字幕图层与图片检查；感谢 Pillow 团队持续维护 Python 图像处理能力。 |
+| [Python](https://www.python.org/) · [CPython 源码](https://github.com/python/cpython) | 流程脚本、文件状态管理和任务衔接；感谢 Python 社区提供易于复现的运行环境。 |
+
+这些工具保留各自的上游许可证；本仓库未打包它们的可执行程序、系统音色或字体。GPT 生图、MiniMax API、macOS `say` 系统配音是外部或系统能力，不列为开源项目。本地流程没有使用 Remotion。
 
 ## 视频流程
 
@@ -123,8 +174,10 @@ jokes/
 │   ├── minimax_video.py
 │   ├── media.py
 │   ├── narration.py
+│   ├── local_video.py
 │   └── package_skill.py
 ├── examples/
+│   ├── afanti/             # 可复现的本地视频：分镜、文案、已验收样片
 │   └── umbrella/
 │       └── story.json
 ├── references/
@@ -137,7 +190,7 @@ jokes/
     └── acceptance.md
 ```
 
-上面展示主要入口；以源码实际文件为准。`runs/` 中保存本地运行状态和产物，不纳入仓库。旧 v1.1.0 的五文件安装包结构不适用于当前视频源码。
+上面展示主要入口；以源码实际文件为准。`runs/` 中保存私有运行状态和产物，不纳入仓库；`examples/afanti/` 是已明确选入版本管理的去标识化样例。旧 v1.1.0 的五文件安装包结构不适用于当前视频源码。
 
 本地打包：`python3 scripts/package_skill.py --output dist/jokes.zip`。压缩包使用显式文件清单，包含可执行脚本、参考规则和示例，不包含 `.env`、密钥、运行产物或登录态。本版通过本地离线测试验证，暂未配置 GitHub Actions；测试不会访问真实视频 API 或上传视频号。
 
