@@ -77,10 +77,12 @@ python3 scripts/pipeline.py status --run runs/umbrella
 缺视频密钥或需要先检查叙事时，可执行：
 
 ```bash
-python3 scripts/pipeline.py preview --run runs/umbrella
+python3 scripts/pipeline.py preview --run runs/umbrella --voiceover
 ```
 
-`preview` 仅制作图片预演，用于检查顺序、字幕、节奏与本地合成。它不调用视频模型，不计为 AI 成片，不能提交给 `upload-package` 冒充真实生成结果。
+macOS 联调优先带 `--voiceover`，用本地中文系统音色补足旁白与角色台词；不需要额外 Key。生成前验证所有台词，按完整音频时长安排停顿，不截断结尾；超过可容纳时长时缩短文案或延长镜头。其他系统没有 `say` 时可省略该选项，并明确预演仍然无配音。字幕角色标签不作为台词念出；镜头可用 `speech` 显式指定 `narrator/woman/man` 与 `text`。
+
+`preview` 仅制作图片预演，用于检查顺序、字幕、配音节奏与本地合成。它不调用视频模型，不计为 AI 成片，不能提交给 `upload-package` 冒充真实生成结果。配音版另存到 `preview-voiceover/`，不覆盖之前的静音预演，也不改动原 GPT 分镜图。原生 H3 视频的台词与声音仍需单独实际检查，不能把本地配音试跑当作 H3 音频验收。
 
 ## 验收与交付
 

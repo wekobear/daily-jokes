@@ -225,9 +225,20 @@ def render(shots: list[dict], run_dir: Path, output: Path, *, preview: bool = Fa
         if evidence and evidence["duration"] + 0.12 < duration:
             raise MediaError(f"{identifier} clip is shorter than its requested duration "
                              f"({evidence['duration']:.3f}s < {duration:.3f}s).")
+        voiceover = None
+        if shot.get("voiceover"):
+            voiceover = _within(root, shot["voiceover"], f"{identifier}.voiceover")
+            try:
+                from .narration import inspect_audio
+            except ImportError:
+                from narration import inspect_audio
+            voice_evidence = inspect_audio(voiceover)
+            if (voice_evidence["duration"] > duration + 0.02
+                    or voice_evidence["peak"] < 0.005 or voice_evidence["rms"] < 0.0001):
+                raise MediaError("Voiceover must be audible and fit the shot without truncation.")
         normalized.append({"id": identifier, "duration": duration,
                            "subtitle": subtitle.strip(), "source": source,
-                           "probe": evidence})
+                           "probe": evidence, "voiceover": voiceover})
 
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".daily-jokes-media-", dir=target.parent) as temp:
@@ -246,9 +257,11 @@ def render(shots: list[dict], run_dir: Path, output: Path, *, preview: bool = Fa
                 args += ["-loop", "1", "-framerate", str(FPS)]
             args += ["-i", str(shot["source"]), "-loop", "1", "-framerate", str(FPS),
                      "-i", str(caption)]
-            if not native_audio:
+            if shot["voiceover"]:
+                args += ["-i", str(shot["voiceover"])]
+            elif not native_audio:
                 args += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
-            audio_input = "0:a:0" if native_audio else "2:a:0"
+            audio_input = "0:a:0" if native_audio and not shot["voiceover"] else "2:a:0"
             video_filter = (
                 f"[0:v:0]scale={WIDTH}:{HEIGHT}:force_original_aspect_ratio=decrease,"
                 f"pad={WIDTH}:{HEIGHT}:(ow-iw)/2:(oh-ih)/2:color=black,"
@@ -314,7 +327,8 @@ def render(shots: list[dict], run_dir: Path, output: Path, *, preview: bool = Fa
         "expected_duration": round(elapsed, 6), "probe": measured,
         "shots": [{"id": shot["id"], "duration": shot["duration"],
                    "source_path": str(shot["source"]),
+                   "voiceover_path": str(shot["voiceover"]) if shot["voiceover"] else None,
                    "source_audio": bool(shot["probe"] and shot["probe"]["audio"]),
-                   "audio_action": "preserved" if shot["probe"] and shot["probe"]["audio"]
+                   "audio_action": "voiceover" if shot["voiceover"] else "preserved" if shot["probe"] and shot["probe"]["audio"]
                    else "silence_added"} for shot in normalized],
     }

@@ -354,17 +354,25 @@ def reconcile_task(run, shot_id, task_id, client=None, env_file=None):
         return {"reconciled": shot_id, "task_id": task_id, "status": task["status"]}
 
 
-def assemble(run, *, preview=False):
+def assemble(run, *, preview=False, voiceover=False):
     from media import render
     with locked_run(run) as (run, story, state):
         verify_images(run, story, state)
-        key = "preview" if preview else "final"
+        if voiceover and not preview:
+            raise ValueError("本地 scratch 配音用于分镜预演；真实成片保留模型音频并另行验收")
+        key = "preview_voiceover" if voiceover else "preview" if preview else "final"
         old = state["outputs"].get(key)
         if old and verify_output(run, old):
             return {"reused": True, **old}
         shots = []
         for shot in story["shots"]:
             prepared = {**shot, "image": state["images"][shot["id"]]["path"]}
+            if voiceover:
+                from narration import synthesize
+                narration = synthesize(shot, run / "voiceover" / f"{shot['id']}.wav")
+                prepared["voiceover"] = str(Path(narration["path"]).relative_to(run))
+                state.setdefault("voiceovers", {})[shot["id"]] = narration
+                save(run, state)
             if not preview:
                 task = state["tasks"].get(shot["id"], {})
                 if task.get("status") != "downloaded":
@@ -373,7 +381,7 @@ def assemble(run, *, preview=False):
                     raise ValueError("已下载视频的指纹不符")
                 prepared["clip"] = task["clip"]
             shots.append(prepared)
-        folder = "preview" if preview else "output"
+        folder = "preview-voiceover" if voiceover else "preview" if preview else "output"
         output = run / folder / f"{key}.mp4"
         for leftover in (output, output.with_suffix(".srt"), output.parent / "cover.jpg"):
             if leftover.exists():
@@ -388,7 +396,8 @@ def assemble(run, *, preview=False):
         evidence = {"kind": "storyboard_preview" if preview else "ai_video", "files": files,
                     "media": rendered["probe"], "verified_at": now(),
                     "shot_media": rendered.get("shots", []),
-                    "semantic_review": "requires_codex_viewing_and_listening"}
+                    "semantic_review": "requires_codex_viewing_and_listening",
+                    "narration": "macos_system_voices" if voiceover else "source_audio_or_silence"}
         state["outputs"][key] = evidence
         save(run, state)
         return evidence
@@ -448,6 +457,7 @@ def status(run):
 def doctor():
     return {"python": sys.version.split()[0], "ffmpeg": shutil.which("ffmpeg"),
             "ffprobe": shutil.which("ffprobe"), "pillow": importlib.util.find_spec("PIL") is not None,
+            "local_preview_tts": shutil.which("say"),
             "minimax_key_in_environment": bool(os.environ.get("MINIMAX_API_KEY")),
             "search": "由 Codex 联网工具执行，须当前会话检查", "image_generation": "由 Codex GPT 生图执行，须当前会话检查",
             "channels_uploader": "not_implemented", "end_to_end_verified": False}
@@ -474,6 +484,8 @@ def main(argv=None):
             command.add_argument("--task-id", required=True)
         if name == "review":
             command.add_argument("--notes", required=True)
+        if name == "preview":
+            command.add_argument("--voiceover", action="store_true", help="使用 macOS 中文系统音色生成旁白与角色配音")
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
@@ -492,7 +504,7 @@ def main(argv=None):
         elif args.command == "reconcile":
             result = reconcile_task(args.run, args.shot, args.task_id, env_file=args.env_file)
         elif args.command in {"assemble", "preview"}:
-            result = assemble(args.run, preview=args.command == "preview")
+            result = assemble(args.run, preview=args.command == "preview", voiceover=getattr(args, "voiceover", False))
         elif args.command == "review":
             result = record_review(args.run, args.notes)
         else:

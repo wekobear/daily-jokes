@@ -6,7 +6,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ["SKILL.md", "requirements.txt", ".env.example", "examples/umbrella/story.json",
-            "scripts/pipeline.py", "scripts/minimax_video.py", "scripts/media.py", "scripts/package_skill.py",
+            "scripts/pipeline.py", "scripts/minimax_video.py", "scripts/media.py", "scripts/narration.py", "scripts/package_skill.py",
             "references/humor-rules.md", "references/onboarding-and-state.md", "references/comic-production.md",
             "references/video-workflow.md", "references/minimax-api.md", "tests/acceptance.md"]
 

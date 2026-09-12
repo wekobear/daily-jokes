@@ -69,10 +69,12 @@ python3 scripts/pipeline.py status --run runs/umbrella
 没有视频密钥时仍可检查分镜和叙事：
 
 ```bash
-python3 scripts/pipeline.py preview --run runs/umbrella
+python3 scripts/pipeline.py preview --run runs/umbrella --voiceover
 ```
 
-`preview` 是图片预演，不调用视频模型，不算真实 AI 视频。`upload-package` 只接受已验证的真实 AI 成片，生成视频、封面、文案与清单供后台接手；**交接包不等于已上传、已保存草稿或已发布**。
+macOS 的 `--voiceover` 用本地中文系统音色生成旁白和角色台词，不需要 API Key。每镜先完整合成台词，再安排停顿；超出时长时只允许小幅提速，仍放不下就报错，不能裁掉结尾。文案默认从字幕中识别“女士：／她：”等说话者，也可在镜头中通过 `speech: [{"speaker": "narrator", "text": "旁白"}, {"speaker": "woman", "text": "台词"}]` 明确设置。原静音版本保留，配音版输出到 `preview-voiceover/preview_voiceover.mp4`。它是系统合成配音预演，不是演员级配音。
+
+其他系统可省略 `--voiceover` 生成静音预演。`preview` 是图片预演，不调用视频模型，不算真实 AI 视频。`upload-package` 只接受已验证的真实 AI 成片，生成视频、封面、文案与清单供后台接手；**交接包不等于已上传、已保存草稿或已发布**。
 
 本版不创建定时任务。将来接入视频号需要目标账号的有效登录与管理／运营权限；后台若要求扫码或手机确认，需由账号持有人完成。公众号素材／草稿 API 和微信小店视频 API 都不能代替普通视频号动态发布。[官方公开视频号能力目录](https://developers.weixin.qq.com/doc/channels/api/channels/)
 
@@ -120,6 +122,7 @@ jokes/
 │   ├── pipeline.py
 │   ├── minimax_video.py
 │   ├── media.py
+│   ├── narration.py
 │   └── package_skill.py
 ├── examples/
 │   └── umbrella/
