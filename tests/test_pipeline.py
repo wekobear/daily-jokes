@@ -52,6 +52,46 @@ class FakeProvider:
 
 @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow required")
 class PipelineTests(unittest.TestCase):
+    def test_source_kinds_do_not_require_fabricated_web_urls(self):
+        story = copy.deepcopy(pipeline.read_json(ROOT / "examples/umbrella/story.json"))
+        for kind in ("original", "user_provided"):
+            story["source"] = {"kind": kind, "title": "本次文案",
+                               "retrieved_at": "2026-09-12", "basis": "本次创作或明确供稿"}
+            self.assertEqual(pipeline.validate_story(story)["source"]["kind"], kind)
+            story["source"]["url"] = "https://example.invalid/false-source"
+            with self.assertRaises(ValueError):
+                pipeline.validate_story(story)
+        story["source"] = {"kind": "web_adaptation", "title": "缺失来源",
+                           "retrieved_at": "2026-09-12", "basis": "未读取"}
+        with self.assertRaises(ValueError):
+            pipeline.validate_story(story)
+
+    def test_original_handoff_uses_honest_source_without_url(self):
+        story = copy.deepcopy(self.story)
+        story["source"] = {"kind": "original", "title": "本次独立创作",
+                           "retrieved_at": "2026-09-12", "basis": "核心包袱独立构思"}
+        files = {}
+        for field, name in (("video_path", "fixture.mp4"), ("cover_path", "fixture.jpg"),
+                            ("srt_path", "fixture.srt")):
+            path = self.run / name
+            path.write_bytes(b"offline packaging fixture")
+            files[field] = {"path": name, "sha256": pipeline.digest(path)}
+        state = {"outputs": {"final": {"kind": "ai_video", "files": files,
+                 "review": {"video_sha256": files["video_path"]["sha256"]}}},
+                 "tasks": {"s1": {"status": "downloaded"}}, "upload": {}}
+
+        @contextmanager
+        def locked(_run):
+            yield self.run, story, state
+
+        with patch.object(pipeline, "locked_run", locked), patch.object(pipeline, "verify_output", return_value=True):
+            result = pipeline.upload_package(self.run)
+        with zipfile.ZipFile(result["path"]) as archive:
+            self.assertIn("来源：本次独立创作", archive.read("post.txt").decode())
+            receipt = json.loads(archive.read("handoff.json"))
+            self.assertEqual(receipt["status"], "awaiting_upload")
+            self.assertEqual(receipt["publication"], "not_published")
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="jokes-runner-")
         self.base = Path(self.temp.name)

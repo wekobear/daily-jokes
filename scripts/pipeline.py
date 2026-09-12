@@ -99,9 +99,18 @@ def validate_story(story):
         if not isinstance(story.get(name), str) or not story[name].strip():
             raise ValueError(f"缺少 story.{name}")
     source = story.get("source", {})
-    if (urlparse(source.get("url", "")).scheme not in ("https", "http")
-            or not all(source.get(key) for key in ("title", "retrieved_at", "basis"))):
-        raise ValueError("缺少真实读取过的网络来源、日期和改编依据")
+    kind = source.get("kind", "web_adaptation")
+    if kind not in {"web_adaptation", "original", "user_provided"}:
+        raise ValueError("source.kind 须为 web_adaptation、original 或 user_provided")
+    if not all(isinstance(source.get(key), str) and source[key].strip()
+               for key in ("title", "retrieved_at", "basis")):
+        raise ValueError("缺少来源名称、日期和使用依据")
+    if kind == "web_adaptation":
+        parsed = urlparse(source.get("url", ""))
+        if parsed.scheme not in ("https", "http") or not parsed.hostname:
+            raise ValueError("缺少真实读取过的网络来源 URL")
+    elif source.get("url"):
+        raise ValueError("原创或用户供稿的 source.url 应留空，不附虚假出处")
     video = story.get("video", {})
     model, resolution = video.get("model"), video.get("resolution")
     if (model, resolution) not in RATES:
@@ -436,11 +445,12 @@ def upload_package(run):
         with zipfile.ZipFile(dest, "x", compression=zipfile.ZIP_DEFLATED) as package:
             for field, name in (("video_path", "video.mp4"), ("cover_path", "cover.jpg"), ("srt_path", "captions.srt")):
                 package.write(inside(run, final["files"][field]["path"]), name)
-            package.writestr("post.txt", f"{story['title']}\n\n{story['description']}\n\n来源：{story['source']['url']}\n")
+            source_label = story["source"].get("url") or story["source"]["title"]
+            package.writestr("post.txt", f"{story['title']}\n\n{story['description']}\n\n来源：{source_label}\n")
             package.writestr("source.json", json.dumps(story["source"], ensure_ascii=False, indent=2))
             package.writestr("handoff.json", json.dumps({"status": "awaiting_upload", "uploader_implemented": False,
                 "publication": "not_published", "video_sha256": final["files"]["video_path"]["sha256"],
-                "verification_required": "目标视频号草稿可重新打开播放并显示对应文案；公开发布另需授权和状态证据"}, ensure_ascii=False, indent=2))
+                "verification_required": "由用户自行选择平台并手动上传；本包未上传、未创建草稿、未公开发布"}, ensure_ascii=False, indent=2))
         state["upload"] = {"status": "awaiting_upload", "adapter": "not_implemented",
                            "package": "upload-package.zip", "package_sha256": digest(dest)}
         save(run, state)

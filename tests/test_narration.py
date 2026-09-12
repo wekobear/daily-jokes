@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -25,6 +26,11 @@ def pcm_samples(path):
 
 
 class SpeechTextTests(unittest.TestCase):
+    def test_external_speech_is_passed_as_literal_text_not_a_file_option(self):
+        with patch.object(narration, "_run") as run:
+            narration._say("--input-file=fixture.txt", "Tingting", 205, Path("voice.aiff"))
+        self.assertEqual(run.call_args.args[0][-2:], ["--", "--input-file=fixture.txt"])
+
     def test_explicit_speech_takes_precedence_over_display_subtitle(self):
         shot = {"id": "s1", "duration": 4, "subtitle": "画面字幕，不应作为配音。",
                 "speech": [{"speaker": "narrator", "text": "旁白在这里。"},

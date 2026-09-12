@@ -1,0 +1,146 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "每日笑话 · 从选稿到本地成片",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "editorial",
+      "label": "收集选稿与图文 · Agent"
+    },
+    {
+      "id": "production",
+      "label": "视频生成与合成 · API + 本地"
+    },
+    {
+      "id": "delivery",
+      "label": "本地交付 → 用户手动上传"
+    }
+  ],
+  "mainPath": [
+    "collect",
+    "best",
+    "storyboard",
+    "video",
+    "download",
+    "review",
+    "handoff",
+    "manual"
+  ],
+  "nodes": [
+    {
+      "id": "collect",
+      "lane": "editorial",
+      "col": 0,
+      "type": "external",
+      "label": "收集与分析",
+      "sublabel": "读取候选 · 包袱查重",
+      "width": 120
+    },
+    {
+      "id": "best",
+      "lane": "editorial",
+      "col": 1,
+      "type": "frontend",
+      "label": "选出当日最佳",
+      "sublabel": "一则故事 · 保留选稿依据",
+      "width": 120
+    },
+    {
+      "id": "storyboard",
+      "lane": "editorial",
+      "col": 2,
+      "type": "frontend",
+      "label": "生成图文与分镜",
+      "sublabel": "独立竖图 · 连续角色",
+      "width": 120
+    },
+    {
+      "id": "video",
+      "lane": "production",
+      "col": 2,
+      "type": "cloud",
+      "label": "第三方视频 API",
+      "sublabel": "核对预算 · 首帧生成视频",
+      "width": 120
+    },
+    {
+      "id": "download",
+      "lane": "production",
+      "col": 3,
+      "type": "backend",
+      "label": "轮询与下载",
+      "sublabel": "复用任务 · 保存真实镜头",
+      "width": 120
+    },
+    {
+      "id": "review",
+      "lane": "production",
+      "col": 4,
+      "type": "backend",
+      "label": "合成与检查",
+      "sublabel": "看画面 · 听完整台词",
+      "width": 120
+    },
+    {
+      "id": "handoff",
+      "lane": "delivery",
+      "col": 4,
+      "type": "database",
+      "label": "本地待上传",
+      "sublabel": "成片、图文与发布素材",
+      "tag": "Skill 交付终点",
+      "width": 120
+    },
+    {
+      "id": "manual",
+      "lane": "delivery",
+      "col": 5,
+      "type": "external",
+      "label": "用户手动上传",
+      "sublabel": "自行选择平台与发布时机",
+      "width": 120
+    }
+  ],
+  "edges": [
+    {
+      "from": "collect",
+      "to": "best"
+    },
+    {
+      "from": "best",
+      "to": "storyboard",
+      "label": "改编"
+    },
+    {
+      "from": "storyboard",
+      "to": "video",
+      "label": "首帧与提示词"
+    },
+    {
+      "from": "video",
+      "to": "download",
+      "label": "异步任务",
+      "role": "async"
+    },
+    {
+      "from": "download",
+      "to": "review",
+      "label": "本地镜头"
+    },
+    {
+      "from": "review",
+      "to": "handoff",
+      "label": "检查通过"
+    },
+    {
+      "from": "handoff",
+      "to": "manual",
+      "label": "人工接手",
+      "variant": "dashed"
+    }
+  ]
+}

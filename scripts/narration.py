@@ -86,7 +86,7 @@ def speech_for_shot(shot):
 
 
 def _say(text, voice, rate, path):
-    _run(["say", "-v", voice, "-r", str(rate), "-o", str(path), text])
+    _run(["say", "-v", voice, "-r", str(rate), "-o", str(path), "--", text])
 
 
 def synthesize(shot, output: Path, *, voices=None, rate=205, synthesizer=None):
