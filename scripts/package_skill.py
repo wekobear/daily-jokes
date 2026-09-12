@@ -5,11 +5,13 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED = ["SKILL.md", "requirements.txt", ".env.example", "examples/umbrella/story.json",
+REQUIRED = ["SKILL.md", "README.md", "requirements.txt", ".env.example", "examples/umbrella/story.json",
             "scripts/pipeline.py", "scripts/minimax_video.py", "scripts/media.py", "scripts/narration.py", "scripts/local_video.py", "scripts/package_skill.py",
             "examples/afanti/story.json", "examples/afanti/images/s1.png", "examples/afanti/images/s2.png", "examples/afanti/images/s3.png",
+            "examples/afanti/demo.mp4", "examples/afanti/cover.jpg",
             "references/humor-rules.md", "references/onboarding-and-state.md", "references/comic-production.md",
-            "references/video-workflow.md", "references/minimax-api.md", "tests/acceptance.md"]
+            "references/video-workflow.md", "references/minimax-api.md", "tests/acceptance.md", "tests/verification.md",
+            "tests/test_media.py", "tests/test_minimax_video.py", "tests/test_pipeline.py", "tests/test_narration.py", "tests/test_local_video.py"]
 
 
 def build(output):

@@ -25,4 +25,4 @@ python3 scripts/package_skill.py --output dist/jokes.zip
 
 本地视频入口另增 1 项真实 FFmpeg 集成测试（`test_local_video.py`），检查声音、时长、逐句字幕、非 API 模式标记、任务状态与重复运行复用；已通过。原 40 项代码在此轮未修改，沿用本次任务已核验结果。测试目录现共 41 项；入口另在新目录使用仓库内阿凡提样例与真实中文系统配音跑通，Skill 格式检查通过。
 
-本次未创建新 release、定时任务、GitHub Actions 或视频号内容。源码推送以 GitHub 的实际提交记录确认，不以此文档代替远端核验。
+上述制作与代码保存阶段未创建 release、定时任务、GitHub Actions 或视频号内容。随后应用户要求发布 v1.2.0，安装包包含本地视频流程及可复现样例；发布是否成功以 GitHub Release 与附件核验为准，不以此文档代替远端结果。

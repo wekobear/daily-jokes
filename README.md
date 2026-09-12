@@ -13,7 +13,7 @@
 - [文字与漫画](#文字与漫画)
 - [开源依赖与致谢](#开源依赖与致谢)
 
-视频流程请使用 [main 分支源码](https://github.com/WekoBear/daily-jokes/tree/main)。[v1.1.0 安装包 jokes.zip](https://github.com/WekoBear/daily-jokes/releases/download/v1.1.0/jokes.zip)仍是旧文字／漫画版本，包含首次配置、原生表单优先、近期热梗及每则独立漫画，**不包含本文的视频流程**。本次不创建新 release。
+当前正式版本为 [v1.2.0 · 本地配音视频流程](https://github.com/wekobear/daily-jokes/releases/tag/v1.2.0)。下载 [Skill 安装包 jokes.zip](https://github.com/wekobear/daily-jokes/releases/download/v1.2.0/jokes.zip)，解压后将完整 `jokes/` 文件夹安装到宿主支持的 Skill 目录。安装包包含本地视频脚本、三张示例分镜、样片、使用说明和测试。也可使用 [main 分支源码](https://github.com/wekobear/daily-jokes/tree/main)；旧 v1.1.0 仍保留供回溯，但不包含视频流程。
 
 仓库根目录本身就是 Skill。从源码安装时，将完整仓库内容放入宿主支持的 `jokes/` 技能目录，保留 `references/`、`scripts/`、`examples/` 和依赖文件，再确认宿主已发现它；不要只复制入口文件。运行区、私有环境文件和登录态不属于可分享的 Skill 包。
 
