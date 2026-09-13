@@ -2,10 +2,14 @@
 """Build the installable jokes/ bundle from an explicit source allowlist."""
 import argparse
 from pathlib import Path
+import re
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED = ["SKILL.md", "README.md", "requirements.txt", ".env.example", ".gitignore", "examples/umbrella/story.json",
+REQUIRED = ["docs/releases-v0.5.0.md", "references/first-use-and-switching.md", "assets/handoff-template.md",
+            "docs/research-v0.4.0.md", "scripts/collect_jokes.py", "tests/test_collect_jokes.py", "references/joke-sources-and-circles.md",
+            "references/performance-formats.md", "examples/daily/standup-fishing.md", "examples/daily/short-formats.md", "docs/releases-v0.4.0.md",
+            "SKILL.md", "README.md", "requirements.txt", ".env.example", ".gitignore", "examples/umbrella/story.json",
             "VERSION", "docs/getting-started.md", "docs/releases-v1.3.0.md", "references/video-provider-contract.md",
             "examples/README.md", "examples/afanti/README.md", "examples/umbrella/README.md",
             "examples/umbrella/images/s1.png", "examples/umbrella/images/s2.png", "examples/umbrella/images/s3.png",
@@ -41,5 +45,8 @@ def build(output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "dist/jokes.zip")
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    if not re.fullmatch(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)", version):
+        parser.error("VERSION must contain three numeric fields: annual.feature.patch")
+    parser.add_argument("--output", type=Path, default=ROOT / "dist" / f"v{version}" / "jokes.zip")
     print(build(parser.parse_args().output))

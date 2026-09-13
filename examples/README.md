@@ -12,4 +12,9 @@
 
 这些样例用于复刻制作步骤，不保证重新调用模型能逐帧重现。H3 视频保留服务商的 AI 生成标识元数据；其中的来源标记或公开签名不是 API Key。私有任务状态、鉴权凭据、签名下载链接和聊天记录不随案例公开。
 
-下载 [v1.3.0 Release](https://github.com/wekobear/daily-jokes/releases/tag/v1.3.0)中的完整 Skill，或单独下载附带 MP4。GitHub 页面若不能直接播放，下载后用本地播放器打开。
+下载 [v0.5.0 Release](https://github.com/wekobear/daily-jokes/releases/tag/v0.5.0)中的完整 Skill，或单独下载附带 MP4。GitHub 页面若不能直接播放，下载后用本地播放器打开。
+
+## 新增文字教学案例
+
+- [钓鱼脱口秀长稿](daily/standup-fishing.md)：独立虚构表演稿，另占每日长稿名额，未录音或演出。
+- [相声与官僚讽刺短段](daily/short-formats.md)：演示整段只算一个节目，不是完整日报，也不是经典台词转录。

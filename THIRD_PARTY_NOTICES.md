@@ -47,6 +47,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+## A-Joke
+
+感谢 [Licoy/A-Joke](https://github.com/Licoy/A-Joke) 提供可读取的历史笑话整理库。固定来源提交为 `9d87e1c8f3fe9123c54fcc818e7fbd0255fd14a4`，上游 MIT 许可证署名为 Copyright (c) 2018 憧憬Licoy。我们的导入器为本项目自写，不执行或复制上游脚本；候选正文仅按需下载到使用者的 runs/，不装入共享 Skill。
+
+[上游许可证](https://github.com/Licoy/A-Joke/blob/9d87e1c8f3fe9123c54fcc818e7fbd0255fd14a4/LICENSE)与[README 来源说明](https://github.com/Licoy/A-Joke/blob/9d87e1c8f3fe9123c54fcc818e7fbd0255fd14a4/README.md)需一并理解：网络整理身份不证明每则内容的原作者或使用权。采用候选时保留条目出处，逐项判断，不宣称整库段子全部公版或原创。
+
+《是，大臣》《是，首相》的名称及剧情资料用于识别与评论，相关权利归其权利人；本包不包含整集字幕、剧本或影视片段。教学讽刺对话为新写，不冒称原剧台词。
+
 ## 其他依赖
 
 感谢 [FFmpeg](https://ffmpeg.org/)、[Pillow](https://python-pillow.org/) 与 [Python](https://www.python.org/) 的开发者和社区。它们各自保留上游许可证；本包不包含其可执行程序、系统音色或本机字体文件。具体 FFmpeg 构建及编码器的许可范围以使用者所安装版本为准。
