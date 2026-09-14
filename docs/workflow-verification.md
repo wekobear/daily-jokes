@@ -13,7 +13,7 @@
 | validation | 9/9 showcase，0 errors，0 warnings |
 | browser_evidence | passed |
 | visual_review | passed（检查了浅色大屏和深色笔记本截图） |
-| correction_rounds | 0（v1.3.0 基于已验收布局更新标签） |
+| correction_rounds | 0（v0.4.0 基于已验收布局更新标签） |
 
 自动浏览器检查覆盖 1440×900、1600×1000、1920×1080、2048×1320，均无页面横向或纵向溢出；另捕获最小和最大尺寸的浅色、深色截图。视觉查看确认主线清楚、中文标签未截断，连线不穿过无关节点，用户手动上传与 Skill 的本地交付终点分开。
 

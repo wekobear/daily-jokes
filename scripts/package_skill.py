@@ -7,10 +7,10 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ["docs/releases-v0.5.0.md", "references/first-use-and-switching.md", "assets/handoff-template.md",
-            "docs/research-v0.4.0.md", "scripts/collect_jokes.py", "tests/test_collect_jokes.py", "references/joke-sources-and-circles.md",
-            "references/performance-formats.md", "examples/daily/standup-fishing.md", "examples/daily/short-formats.md", "docs/releases-v0.4.0.md",
+            "docs/research-v0.5.0.md", "scripts/collect_jokes.py", "tests/test_collect_jokes.py", "references/joke-sources-and-circles.md",
+            "references/performance-formats.md", "examples/daily/standup-fishing.md", "examples/daily/short-formats.md",
             "SKILL.md", "README.md", "requirements.txt", ".env.example", ".gitignore", "examples/umbrella/story.json",
-            "VERSION", "docs/getting-started.md", "docs/releases-v1.3.0.md", "references/video-provider-contract.md",
+            "VERSION", "docs/getting-started.md", "docs/releases-v0.4.0.md", "references/video-provider-contract.md",
             "examples/README.md", "examples/afanti/README.md", "examples/umbrella/README.md",
             "examples/umbrella/images/s1.png", "examples/umbrella/images/s2.png", "examples/umbrella/images/s3.png",
             "examples/umbrella/cover.jpg", "examples/umbrella/preview-silent.mp4", "examples/umbrella/preview-voiceover.mp4",
