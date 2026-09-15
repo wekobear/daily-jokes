@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>幽默法庭 · 判决书</title>
+<!-- Tailwind CDN：唯一外部依赖 -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: 'var(--ink)',
+        ink2: 'var(--ink2)',
+        paper: 'var(--paper)',
+        line: 'var(--line)',
+        seal: 'var(--seal)',
+        gold: 'var(--gold)',
+      },
+      fontFamily: {
+        song: ['"Songti SC"', '"Noto Serif SC"', '"STSong"', '"SimSun"', 'serif'],
+      },
+    },
+  },
+};
+</script>
+<style>
+  /* ===== 主题变量：浅色为主，深色顺随系统 ===== */
+  :root {
+    --bg: #ece5d3;
+    --paper: #faf6ea;
+    --paper2: #f1e9d5;
+    --ink: #2c2618;
+    --ink2: #77694f;
+    --line: #d9cdae;
+    --seal: #a63b2a;
+    --sealbg: #f4e2da;
+    --gold: #8d6d1e;
+    --goldbg: #f3e9cd;
+    --green: #4d6b45;
+    --greenbg: #e3ebd9;
+    --shadow: 0 12px 32px rgba(88, 64, 20, 0.12);
+    --shadow-sm: 0 2px 8px rgba(88, 64, 20, 0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141109;
+      --paper: #211c10;
+      --paper2: #2a2416;
+      --ink: #e9dfc6;
+      --ink2: #a3957a;
+      --line: #3f3722;
+      --seal: #e57a63;
+      --sealbg: #39201a;
+      --gold: #d6af52;
+      --goldbg: #31280f;
+      --green: #9dba8c;
+      --greenbg: #202b19;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+  }
+  /* 纸面卡片（判决书主角）与案卷卡片（配角） */
+  .paperx { background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .folder { background: var(--paper2); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+  /* 判决书卡片的内衬细线（卷宗感） */
+  .verdict { position: relative; }
+  .verdict::before {
+    content: ''; position: absolute; inset: 6px;
+    border: 1px solid var(--line); border-radius: 12px;
+    pointer-events: none; z-index: 0;
+  }
+  .verdict > * { position: relative; z-index: 1; }
+  /* 角落朱印 */
+  .stamp {
+    position: absolute; top: 14px; right: 14px;
+    border: 1.5px solid var(--seal); color: var(--seal);
+    font-size: 10px; line-height: 1.35; padding: 4px 6px; border-radius: 4px;
+    transform: rotate(6deg); opacity: 0.75; letter-spacing: 0.1em; text-align: center;
+  }
+  /* 分级配色：文字 tone-* / 底色块 chip-* */
+  .tone-good { color: var(--gold); }
+  .tone-mid { color: var(--ink); }
+  .tone-bad { color: var(--seal); }
+  .tone-green { color: var(--green); }
+  .chip-good { background: var(--goldbg); color: var(--gold); }
+  .chip-mid { background: var(--paper2); color: var(--ink); }
+  .chip-bad { background: var(--sealbg); color: var(--seal); }
+  .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tag {
+    font-size: 10px; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 4px;
+    border: 1px solid var(--line); color: var(--ink2); white-space: nowrap;
+  }
+  /* 按钮 */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border-radius: 10px; padding: 11px 12px; font-size: 13px; font-weight: 600;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-seal { background: var(--seal); color: #fff; }
+  .btn-ghost { background: var(--paper2); color: var(--ink); border: 1px solid var(--line); }
+  /* 选中案件卡片 */
+  .case-card { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; text-align: left; width: 100%; }
+  .case-card:hover { transform: translateY(-1px); }
+  .case-card.sel { border-color: var(--seal); box-shadow: 0 0 0 1px var(--seal), var(--shadow-sm); }
+  textarea::placeholder { color: var(--ink2); opacity: 0.6; }
+  /* 折叠条 */
+  .fold {
+    width: 100%; padding: 10px 12px; font-size: 12px; letter-spacing: 0.15em;
+    color: var(--ink2); background: var(--paper2);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+<div class="max-w-[430px] mx-auto min-h-screen">
+
+  <!-- ============ 顶部：标题 + 副标题 ============ -->
+  <header class="pt-9 pb-1 text-center px-6">
+    <div class="text-[32px] leading-none">⚖️</div>
+    <h1 class="font-song font-bold text-[30px] tracking-[0.28em] pl-[0.28em] mt-2">幽默法庭</h1>
+    <p class="text-xs text-ink2 tracking-[0.3em] pl-[0.3em] mt-2.5">本庭只审笑话，不审人</p>
+  </header>
+
+  <!-- ============ 三条铁律 ============ -->
+  <section class="px-4 mt-6">
+    <div class="paperx rounded-2xl px-4 py-4">
+      <div class="text-center text-[11px] tracking-[0.4em] pl-[0.4em] text-ink2 mb-3.5">— 三 条 铁 律 —</div>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-6 h-6 rounded-full border flex items-center justify-center font-song text-xs font-bold tone-good" style="border-color:var(--gold)">壹</span>
+          <div>
+            <p class="text-sm font-semibold">判笑话，不判人</p>
+            <p class="text-xs text-ink2 leading-relaxed mt-0.5">所有攻击性落在笑话文本上，讲述者永远豁免。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-6 h-6 rounded-full border flex items-center justify-center font-song text-xs font-bold tone-good" style="border-color:var(--gold)">贰</span>
+          <div>
+            <p class="text-sm font-semibold">毒舌必须带依据</p>
+            <p class="text-xs text-ink2 leading-relaxed mt-0.5">每句刻薄指出具体机制缺陷，不许空洞辱骂。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-6 h-6 rounded-full border flex items-center justify-center font-song text-xs font-bold tone-good" style="border-color:var(--gold)">叁</span>
+          <div>
+            <p class="text-sm font-semibold">极刑也留活口</p>
+            <p class="text-xs text-ink2 leading-relaxed mt-0.5">再惨的判决也附一句改写方向。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 演示案件区 ============ -->
+  <section class="mt-8">
+    <div class="px-5 mb-3 flex items-baseline gap-2">
+      <span class="w-1 h-3.5 rounded-full" style="background:var(--seal)"></span>
+      <h2 class="font-song font-bold text-base tracking-[0.2em]">在审案卷</h2>
+      <span class="text-[10px] text-ink2">点击任一案件，立即宣判</span>
+    </div>
+    <div id="caseCards" class="px-4 space-y-3"></div>
+  </section>
+
+  <!-- ============ 自定义输入区 ============ -->
+  <section class="mt-8">
+    <div class="px-5 mb-3 flex items-baseline gap-2">
+      <span class="w-1 h-3.5 rounded-full" style="background:var(--seal)"></span>
+      <h2 class="font-song font-bold text-base tracking-[0.2em]">自首柜台</h2>
+      <span class="text-[10px] text-ink2">自写笑话 · 原型阶段暂不实时开庭</span>
+    </div>
+    <div class="px-4">
+      <div class="folder rounded-2xl p-3.5">
+        <textarea id="jokeInput" rows="4" placeholder="把你的笑话写在这里，交给本庭……"
+          class="w-full bg-transparent text-[13px] leading-relaxed focus:outline-none resize-none"></textarea>
+        <div class="flex justify-end mt-2">
+          <button id="btnSubmit" class="btn btn-ghost !px-5 !py-2 text-xs">递交本庭</button>
+        </div>
+        <!-- 诚实提示条（提交后出现） -->
+        <div id="hintBar" hidden class="mt-3 rounded-xl px-3.5 py-3 text-xs leading-relaxed"
+          style="background:var(--goldbg); border:1px solid var(--gold);">
+          原型阶段仅支持演示案件。任意输入的实时审判将在接入真判官（LLM）后开放。可先点击上方「在审案卷」，查看本庭判例。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 判决书渲染区 ============ -->
+  <section id="verdictSection" class="mt-8 scroll-mt-4">
+    <div class="px-5 mb-3 flex items-baseline gap-2">
+      <span class="w-1 h-3.5 rounded-full" style="background:var(--seal)"></span>
+      <h2 class="font-song font-bold text-base tracking-[0.2em]">判决书</h2>
+      <span class="text-[10px] text-ink2">先宣判，后庭审</span>
+    </div>
+    <div class="px-4">
+      <!-- 未选案件时的占位 -->
+      <div id="verdictEmpty" class="folder rounded-2xl px-6 py-12 text-center">
+        <div class="text-3xl mb-2">⚖️</div>
+        <p class="text-sm text-ink2">本庭尚未开庭</p>
+        <p class="text-xs text-ink2 mt-1.5">请从上方「在审案卷」选择一件演示案件</p>
+      </div>
+      <!-- 判决书卡片（选中后由 JS 渲染） -->
+      <div id="verdictCard" hidden class="verdict paperx rounded-2xl overflow-hidden"></div>
+    </div>
+  </section>
+
+  <!-- ============ 九级量刑表（可折叠） ============ -->
+  <section class="mt-8">
+    <div class="px-4">
+      <button id="btnTable" class="w-full paperx rounded-2xl px-4 py-3.5 flex items-center justify-between">
+        <span class="flex items-baseline gap-2">
+          <span class="w-1 h-3.5 rounded-full" style="background:var(--seal)"></span>
+          <span class="font-song font-bold text-base tracking-[0.2em]">九级量刑表</span>
+        </span>
+        <span id="tableArrow" class="text-xs text-ink2">▾</span>
+      </button>
+      <div id="tableBody" hidden class="mt-2.5 folder rounded-2xl p-3 space-y-2">
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-good">
+          <span class="font-song font-bold text-sm w-8 text-center">S+</span>
+          <span class="text-[13px] flex-1">判官辞职</span>
+          <span class="text-xs tabular-nums opacity-80">95+</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-good">
+          <span class="font-song font-bold text-sm w-8 text-center">S</span>
+          <span class="text-[13px] flex-1">开放麦压轴</span>
+          <span class="text-xs tabular-nums opacity-80">85–94</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-good">
+          <span class="font-song font-bold text-sm w-8 text-center">A</span>
+          <span class="text-[13px] flex-1">准予当庭发笑</span>
+          <span class="text-xs tabular-nums opacity-80">70–84</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-mid" style="border:1px solid var(--line)">
+          <span class="font-song font-bold text-sm w-8 text-center">B</span>
+          <span class="text-[13px] flex-1">准予有限发笑</span>
+          <span class="text-xs text-ink2 tabular-nums">55–69</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-mid" style="border:1px solid var(--line)">
+          <span class="font-song font-bold text-sm w-8 text-center">C</span>
+          <span class="text-[13px] flex-1">冷场边缘观察</span>
+          <span class="text-xs text-ink2 tabular-nums">40–54</span>
+        </div>
+        <!-- 冷场区分界线 -->
+        <div class="flex items-center gap-2 px-1 pt-0.5">
+          <div class="flex-1" style="border-top:1px dashed var(--seal)"></div>
+          <span class="text-[10px] tracking-[0.2em] tone-bad">40 分以下 · 冷场区</span>
+          <div class="flex-1" style="border-top:1px dashed var(--seal)"></div>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-bad">
+          <span class="font-song font-bold text-sm w-8 text-center">D</span>
+          <span class="text-[13px] flex-1">冷场试营业</span>
+          <span class="text-xs tabular-nums opacity-80">30–39</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-bad">
+          <span class="font-song font-bold text-sm w-8 text-center">E</span>
+          <span class="text-[13px] flex-1">气氛注销处</span>
+          <span class="text-xs tabular-nums opacity-80">20–29</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-bad">
+          <span class="font-song font-bold text-sm w-8 text-center">F</span>
+          <span class="text-[13px] flex-1">包袱失踪多年</span>
+          <span class="text-xs tabular-nums opacity-80">10–19</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 chip-bad">
+          <span class="font-song font-bold text-sm w-8 text-center">G</span>
+          <span class="text-[13px] flex-1">笑话本人已报警</span>
+          <span class="text-xs tabular-nums opacity-80">0–9</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="mt-10 text-center px-6">
+    <p class="text-[10px] text-ink2 tracking-[0.2em]">幽默法庭 · 交互原型</p>
+    <p class="text-[10px] text-ink2 mt-1 opacity-80">判例数据已人工核验，仅供演示</p>
+  </footer>
+</div>
+
+<!-- 全局 toast -->
+<div id="toast" class="fixed left-1/2 bottom-8 z-50 -translate-x-1/2 translate-y-3 opacity-0 pointer-events-none transition-all duration-300 px-4 py-2.5 rounded-xl text-xs leading-relaxed max-w-[86vw] text-center paperx"></div>
+
+<script>
+/* ========== 演示案件数据（已人工核验，原样内嵌，一字不改） ========== */
+const CASES = [
+  {
+    id: 'HM-20260915-0041',
+    text: '健身房的年卡有个隐藏功能：办卡那一刻，锻炼就已经完成了。之后去不去，只影响身高和体重，不影响成就感。',
+    total: 73,
+    gradeLetter: 'A',
+    gradeName: '准予当庭发笑',
+    crime: '指控不成立，准予当庭释放笑声',
+    verdict: '“办卡即完成”的反差经得起对账——本庭核实，确实有人付完钱就再没回来过。',
+    dims: [
+      { name: '预期建立', short: '预期', score: 15, full: 20, note: '前半句把‘年卡’当产品功能介绍，正经得像健身房传单，预期方向给足了。' },
+      { name: '笑点兑现', short: '笑点', score: 18, full: 25, note: '反差落在真实行为上，‘成就感’三个字接住了所有办过卡的人。' },
+      { name: '机制成立度', short: '机制', score: 17, full: 25, note: '生活观察主导：点破‘付款即心理完成’的规律，不需要大反转也成立。本庭确认该机制在现有规则下独立成立。' },
+      { name: '表达效率', short: '表达', score: 12, full: 15, note: '两句各干各的活，没有一句在加班。' },
+      { name: '落点控制', short: '落点', score: 11, full: 15, note: '‘不影响成就感’收得及时。再补一句感慨，本庭就要改判了。' },
+    ],
+    breakpoint: '无（指控不成立）。若非要说成长空间：反差方向偏稳，冲击力没到让陌生人转发的量级。',
+    rewrite: '保留“付款即完成”，把后半句换成更具体的证据（比如“我的年卡使用记录比我的聊天记录还干净”），让观察落地成画面。',
+  },
+  {
+    id: 'HM-20260915-0037',
+    text: '为什么数学书总是很忧郁？因为它有太多问题。',
+    total: 53,
+    gradeLetter: 'C',
+    gradeName: '冷场边缘观察',
+    crime: '陈年双关再流通',
+    verdict: '双关手续合法，但这个包袱的出厂日期早于在座所有人的手机。',
+    dims: [
+      { name: '预期建立', short: '预期', score: 14, full: 20, note: '问答式开场，预期建立流程合规。合规到每一本笑话书都这么开头。' },
+      { name: '笑点兑现', short: '笑点', score: 10, full: 25, note: '‘问题’的双义确实存在，读者会心半秒——然后想起小学也听过。' },
+      { name: '机制成立度', short: '机制', score: 12, full: 25, note: '双关成立：‘问题’的两种词义在语境里都能落。成立，但不新。机制合法，机制过时。' },
+      { name: '表达效率', short: '表达', score: 9, full: 15, note: '一问一答，无废话。本庭承认它干净——干净不是罪，也不是才。' },
+      { name: '落点控制', short: '落点', score: 8, full: 15, note: '答句即包袱，位置正确。可惜答案到得太准时，准时到能被预习。' },
+    ],
+    breakpoint: '机制成立但识别度过高——读者在问句出现时已能预填答案。',
+    rewrite: '换一个“问题”双关的新载体，或把答案延后一拍，让读者先给出自己的答案再被反超。',
+  },
+  {
+    id: 'HM-20260915-0042',
+    text: '我去银行取钱，排了一小时。终于轮到我，我取完钱回家了。',
+    total: 23,
+    gradeLetter: 'E',
+    gradeName: '气氛注销处',
+    crime: '结尾原地踏步',
+    verdict: '“排了一小时的队，只有钱到账，包袱没到账。”',
+    dims: [
+      { name: '预期建立', short: '预期', score: 8, full: 20, note: '‘排了一小时’加‘终于’抬起了期待，方向对——但只搭了台，没派人上台。' },
+      { name: '笑点兑现', short: '笑点', score: 2, full: 25, note: '结尾完成了一次普通的取钱。取钱是真的，笑是没有的。' },
+      { name: '机制成立度', short: '机制', score: 1, full: 25, note: '本庭找不到任何喜剧关系在支撑这个结尾：没有反差、没有揭示、没有反预期的拆解。流程记录不构成笑话。' },
+      { name: '表达效率', short: '表达', score: 8, full: 15, note: '句子干净，这不假——但按防漏洞条款，干净本身不加分：每句话都没为喜剧效果干活。' },
+      { name: '落点控制', short: '落点', score: 4, full: 15, note: '‘回家了’没有削弱包袱，因为它面前没有包袱可削弱。' },
+    ],
+    breakpoint: '“终于”抬起的期待在结尾只被既定流程接住，没有新理解落地。',
+    rewrite: '保留等待，让结尾揭示一个与一小时不相称的小目标（比如只取了两块钱给游戏充值），让等待与目的互为包袱。',
+  },
+  {
+    id: 'HM-20260915-0043',
+    text: '我昨天去画画，画了一个太阳。老师说你画得真好。我说谢谢。然后我就回家了。',
+    total: 9,
+    gradeLetter: 'G',
+    gradeName: '笑话本人已报警',
+    crime: '反笑话外形，无拆解事实',
+    verdict: '本笑话借用了反笑话的证件照，本庭核对了本人——不是它。',
+    dims: [
+      { name: '预期建立', short: '预期', score: 2, full: 20, note: '‘笑话体’开头让读者摆好等包袱的姿势，然后剧情自己去回家了。' },
+      { name: '笑点兑现', short: '笑点', score: 1, full: 25, note: '全部内容为真实事件转述。真实，属实，不好笑。' },
+      { name: '机制成立度', short: '机制', score: 2, full: 25, note: '外形接近反笑话，但按现有规则，反笑话需要可感知的套路拆解——本庭未检出任何被拆的套路。普通陈述不是反笑话。' },
+      { name: '表达效率', short: '表达', score: 3, full: 15, note: '本庭承认它短。按防漏洞条款，短既不是罪名，也不构成从轻情节。' },
+      { name: '落点控制', short: '落点', score: 1, full: 15, note: '结尾停在‘回家了’。读者也回家了。' },
+    ],
+    breakpoint: '无喜剧关系成立；连“不成立得有意思”都没做到。',
+    rewrite: '两个活路——要么给“画得真好”安一个具体到反常的后果（老师把它挂进了保卫处），要么承认这是日记，别按笑话报案。',
+  },
+];
+/* ========== 工具函数 ========== */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/* 总分分级：70+ 金、40–69 中性、40 以下暖红（冷场区） */
+const bandOf = (t) => (t >= 70 ? 'good' : t >= 40 ? 'mid' : 'bad');
+/* 单维分级：按得分率 */
+function dimBand(score, full) { const r = score / full; return r >= 0.6 ? 'good' : r >= 0.3 ? 'mid' : 'bad'; }
+
+let current = -1;   /* 当前选中案件下标 */
+let toastTimer = null;
+
+/* toast 提示 */
+function toast(msg, dur) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.remove('opacity-0', 'translate-y-3');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.add('opacity-0', 'translate-y-3'); }, dur || 3000);
+}
+
+/* ========== 演示案件卡片 ========== */
+function renderCards() {
+  $('#caseCards').innerHTML = CASES.map((c, i) => {
+    const b = bandOf(c.total);
+    return (
+      '<button type="button" data-i="' + i + '" class="case-card folder rounded-xl p-3.5">' +
+        '<div class="flex items-center justify-between gap-2">' +
+          '<span class="text-[11px] tracking-wider text-ink2">案号 ' + c.id + '</span>' +
+          '<span class="tag">演示案件 · 已人工核验</span>' +
+        '</div>' +
+        '<p class="clamp2 font-song text-[13px] leading-relaxed mt-2">「' + esc(c.text) + '」</p>' +
+        '<div class="flex items-center justify-between mt-3 pt-2.5" style="border-top:1px dashed var(--line)">' +
+          '<span class="chip-' + b + ' rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wide">' +
+            c.gradeLetter + ' 级｜' + c.gradeName + '</span>' +
+          '<span class="text-[11px] text-ink2">总分 <b class="font-song text-lg tone-' + b + ' tabular-nums">' + c.total + '</b></span>' +
+        '</div>' +
+      '</button>'
+    );
+  }).join('');
+  document.querySelectorAll('.case-card').forEach((el) => {
+    el.addEventListener('click', () => selectCase(Number(el.dataset.i)));
+  });
+}
+
+/* ========== 判决书渲染（宣判层 + 庭审详情层） ========== */
+function renderVerdict(c) {
+  const b = bandOf(c.total);
+  /* 五维分数一行（宣判层）：短名 + 实际分数/满分 */
+  const dimLine = c.dims
+    .map((d) => '<span class="whitespace-nowrap">' + d.short + ' <b class="font-song tabular-nums">' + d.score + '/' + d.full + '</b></span>')
+    .join('<span class="opacity-60"> · </span>');
+  /* 庭审详情：逐维列表 */
+  const dimRows = c.dims
+    .map((d) => {
+      const db = dimBand(d.score, d.full);
+      return (
+        '<div class="pt-3" style="border-top:1px dashed var(--line)">' +
+          '<div class="flex items-baseline justify-between">' +
+            '<span class="text-[13px] font-semibold">' + d.name + '</span>' +
+            '<span class="font-song font-bold text-[15px] tone-' + db + ' tabular-nums">' + d.score +
+              '<span class="text-[11px] font-normal text-ink2"> / ' + d.full + '</span></span>' +
+          '</div>' +
+          '<p class="text-xs text-ink2 leading-relaxed mt-1">' + esc(d.note) + '</p>' +
+        '</div>'
+      );
+    })
+    .join('');
+
+  $('#verdictCard').innerHTML =
+    /* ---- 宣判层 ---- */
+    '<div class="pt-7 pb-4 px-6 text-center" style="border-bottom:3px double var(--line)">' +
+      '<span class="stamp">幽默<br>法庭</span>' +
+      '<div class="font-song font-bold text-base tracking-[0.3em] pl-[0.3em]">⚖️ 幽默法庭 · 判决书</div>' +
+      '<div class="text-[10px] tracking-[0.25em] text-ink2 mt-2">案件编号 ' + c.id + '</div>' +
+    '</div>' +
+    '<div class="px-6 py-6 text-center" style="border-bottom:1px solid var(--line)">' +
+      '<div class="flex items-end justify-center gap-1.5">' +
+        '<span class="font-song font-bold text-[56px] leading-none tone-' + b + ' tabular-nums">' + c.total + '</span>' +
+        '<span class="text-sm text-ink2 mb-1.5">/ 100</span>' +
+      '</div>' +
+      '<div class="mt-3.5">' +
+        '<span class="chip-' + b + ' rounded-full px-3.5 py-1 text-xs font-bold tracking-[0.15em]">' +
+          c.gradeLetter + ' 级｜' + c.gradeName + '</span>' +
+      '</div>' +
+      '<p class="text-sm mt-3.5"><span class="text-ink2">本案罪名：</span><span class="font-medium">' + esc(c.crime) + '</span></p>' +
+    '</div>' +
+    '<div class="px-6 py-6">' +
+      /* 主判词（引号引用体） */
+      '<div class="font-song text-[15px] leading-[2] text-center px-1">' +
+        '<span class="tone-bad text-lg align-top">「</span>' + esc(c.verdict) + '<span class="tone-bad text-lg align-bottom">」</span>' +
+      '</div>' +
+      /* 受审文本 */
+      '<div class="mt-5 rounded-lg px-3.5 py-3 text-[13px] leading-relaxed font-song" style="background:var(--paper2); border:1px solid var(--line)">' +
+        '<span class="text-xs text-ink2" style="font-family:-apple-system,\'PingFang SC\',sans-serif">受审文本：</span>' +
+        '「' + esc(c.text) + '」' +
+      '</div>' +
+      /* 五维分数一行 */
+      '<div class="mt-4 pt-3 -mx-3 px-1 text-center text-[10px] text-ink2 flex flex-wrap items-baseline justify-center gap-x-1 gap-y-1" style="border-top:1px dashed var(--line)">' +
+        dimLine +
+      '</div>' +
+    '</div>' +
+    /* 折叠条：查看完整庭审 */
+    '<button id="btnDetail" type="button" class="fold flex items-center justify-center gap-1.5">' +
+      '<span id="detailLabel">查看完整庭审</span><span id="detailArrow">▾</span>' +
+    '</button>' +
+    /* ---- 庭审详情层（默认折叠） ---- */
+    '<div id="detailWrap" hidden>' +
+      '<div class="px-6 py-5" style="border-bottom:1px solid var(--line)">' +
+        '<div class="text-center text-[11px] tracking-[0.35em] pl-[0.35em] text-ink2 mb-4">— 庭 审 详 情 —</div>' +
+        '<div class="space-y-3">' + dimRows + '</div>' +
+        '<div class="mt-4 rounded-lg px-3.5 py-3" style="background:var(--sealbg)">' +
+          '<div class="text-xs font-bold tracking-[0.15em] tone-bad">首要断点</div>' +
+          '<p class="text-xs leading-relaxed mt-1.5">' + esc(c.breakpoint) + '</p>' +
+        '</div>' +
+        '<div class="mt-2.5 rounded-lg px-3.5 py-3" style="background:var(--greenbg)">' +
+          '<div class="text-xs font-bold tracking-[0.15em] tone-green">改写方向</div>' +
+          '<p class="text-xs leading-relaxed mt-1.5">' + esc(c.rewrite) + '</p>' +
+        '</div>' +
+      '</div>' +
+      /* 底部两行口号 */
+      '<div class="px-6 py-4 text-center space-y-1">' +
+        '<p class="font-song text-[11px] text-ink2 tracking-[0.12em]">本庭不接受求情，接受新证据。</p>' +
+        '<p class="font-song text-[11px] text-ink2 tracking-[0.12em]">仅审文本，不评价讲述者。</p>' +
+      '</div>' +
+    '</div>' +
+    /* 复制按钮 */
+    '<div class="px-5 pb-5 pt-1">' +
+      '<button id="btnCopy" type="button" class="btn btn-ghost w-full">复制判决书文本</button>' +
+    '</div>';
+
+  $('#btnDetail').addEventListener('click', toggleDetail);
+  $('#btnCopy').addEventListener('click', copyVerdict);
+}
+
+/* 展开 / 收起庭审详情 */
+function toggleDetail() {
+  const w = $('#detailWrap');
+  const opening = w.hidden;
+  w.hidden = !opening;
+  $('#detailLabel').textContent = opening ? '收起庭审详情' : '查看完整庭审';
+  $('#detailArrow').textContent = opening ? '▴' : '▾';
+}
+
+/* ========== 复制判决书（按宣判层结构拼纯文本，含全部五维与短评） ========== */
+function verdictText(c) {
+  const L = [];
+  L.push('⚖️ 幽默法庭 · 判决书');
+  L.push('案件编号：' + c.id);
+  L.push('总分：' + c.total + ' / 100');
+  L.push('等级：' + c.gradeLetter + ' 级｜' + c.gradeName);
+  L.push('本案罪名：' + c.crime);
+  L.push('');
+  L.push('【主判词】');
+  L.push(c.verdict);
+  L.push('');
+  L.push('【受审文本】');
+  L.push(c.text);
+  L.push('');
+  L.push('【五维评分】');
+  L.push(c.dims.map((d) => d.short + ' ' + d.score + '/' + d.full).join(' · '));
+  c.dims.forEach((d) => { L.push(d.name + ' ' + d.score + '/' + d.full + '：' + d.note); });
+  L.push('');
+  L.push('首要断点：' + c.breakpoint);
+  L.push('改写方向：' + c.rewrite);
+  L.push('');
+  L.push('本庭不接受求情，接受新证据。');
+  L.push('仅审文本，不评价讲述者。');
+  return L.join('\n');
+}
+
+function copyVerdict() {
+  if (current < 0) return;
+  const txt = verdictText(CASES[current]);
+  const done = () => toast('判决书已复制到剪贴板 ⚖️');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
+  } else {
+    fallbackCopy(txt, done);
+  }
+}
+/* file:// 等场景下 clipboard API 可能不可用，退回 execCommand */
+function fallbackCopy(txt, done) {
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    done();
+  } catch (e) {
+    toast('复制失败，请长按判决书手动复制');
+  }
+  ta.remove();
+}
+
+/* ========== 选择案件 ========== */
+function selectCase(i) {
+  current = i;
+  document.querySelectorAll('.case-card').forEach((el, k) => el.classList.toggle('sel', k === i));
+  renderVerdict(CASES[i]);
+  $('#verdictCard').hidden = false;
+  $('#verdictEmpty').hidden = true;
+  $('#verdictSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ========== 自定义输入：诚实提示，绝不产生伪评分 ========== */
+$('#btnSubmit').addEventListener('click', () => {
+  const v = $('#jokeInput').value.trim();
+  if (!v) {
+    toast('本庭不审空白卷宗：请先写下一个笑话。', 2500);
+    return;
+  }
+  $('#hintBar').hidden = false;
+  toast('原型阶段仅支持演示案件。任意输入的实时审判将在接入真判官（LLM）后开放。', 3800);
+});
+
+/* ========== 量刑表折叠 ========== */
+$('#btnTable').addEventListener('click', () => {
+  const body = $('#tableBody');
+  const opening = body.hidden;
+  body.hidden = !opening;
+  $('#tableArrow').textContent = opening ? '▴' : '▾';
+});
+
+/* ========== 初始化 ========== */
+renderCards();
+</script>
+</body>
+</html>
